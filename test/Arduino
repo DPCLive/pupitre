@@ -1,4 +1,3 @@
-  
 // Vincent D, le 14/01/2020
 
 // Données D0 à D7
@@ -10,6 +9,8 @@
 #define int IORD PROGMEM = 30; // int en byte
 #define int RST PROGMEM = 22; // int en byte
 #define int CLK PROGMEM = 23; // int en byte
+
+#define  int DataPinMode = INPUT & INPUT_PULLUP & OUTPUT;
 
 void setup() {
   // put your setup code here, to run once:
@@ -28,9 +29,25 @@ void setup() {
   digitalWrite(pgm_read_word(&RST), LOW );          
   digitalWrite(pgm_read_word(&CLK), LOW );    
 
+  setDataPinAsOutput();
+
+  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
+}
+
+// to write LED and Display
+void setDataPinAsOutput()
+{
+  if (DataPinMode != OUTPUT)
+  {
+    for (int i=0; i<8; i++)
+      pinMode( dataPin[i], OUTPUT);
+    delay(2);
+  
+    DataPinMode = OUTPUT;
+  }
 }
