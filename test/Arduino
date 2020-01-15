@@ -1,14 +1,15 @@
+  
 // Vincent D, le 14/01/2020
 
 // Données D0 à D7
-const byte dataPin[8] = {29, 31, 33, 35, 37, 29, 41, 43};
+#define byte dataPin[8] = {29, 31, 33, 35, 37, 29, 41, 43};
 // A1 à A4
-const int aPin[4] PROGMEM = {24, 25, 26, 27};
+#define int aPin[4] PROGMEM = {24, 25, 26, 27};
 
-const int IOWR PROGMEM = 29; // int en byte
-const int IORD PROGMEM = 30; // int en byte
-const int RST PROGMEM = 22; // int en byte
-const int CLK PROGMEM = 23; // int en byte
+#define int IOWR PROGMEM = 29; // int en byte
+#define int IORD PROGMEM = 30; // int en byte
+#define int RST PROGMEM = 22; // int en byte
+#define int CLK PROGMEM = 23; // int en byte
 
 void setup() {
   // put your setup code here, to run once:
@@ -22,10 +23,10 @@ void setup() {
   for (int i=0; i<4; i++)
     pinMode(pgm_read_word(&aPin[i]), OUTPUT );  
 
-  digitalWrite(pgm_read_word(&IOWR), HIGH );          
-  digitalWrite(pgm_read_word(&IORD), HIGH );          
-  digitalWrite(pgm_read_word(&RST), HIGH );          
-  digitalWrite(pgm_read_word(&CLK), HIGH );    
+  digitalWrite(pgm_read_word(&IOWR), LOW );          
+  digitalWrite(pgm_read_word(&IORD), LOW );          
+  digitalWrite(pgm_read_word(&RST), LOW );          
+  digitalWrite(pgm_read_word(&CLK), LOW );    
 
 }
 
