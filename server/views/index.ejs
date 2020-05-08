@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <div class="a-K1WND-0"><%- include('menu'); -%></div>
+        <div class="a-K1WND-1"><%- include('status'); -%></div>
+        <div class="a-3Qoq9-3-0-0"><%- include('menuVerticale'); -%></div>
+        <div class="a-K1WND-2-0">a-K1WND-2-0</div>
+        <div class="a-K1WND-2-1">a-K1WND-2-1</div>
+        <div class="a-K1WND-6">a-K1WND-6</div>
+      </div>
+      <link href="/css/style.css" rel="stylesheet" type="text/css">
+      <link href="/css/menu.css" rel="stylesheet" type="text/css">
+
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+          var socket = io.connect('http://localhost:8000');
+          socket.on('statusAtem', (data) => {
+            var Atem = JSON.parse(data);
+            console.log(Atem)
+
+            switch (Atem.status) {
+                case 1:
+                document.getElementById("statusAtem").classList.add("alert-noConnect");
+                document.getElementById("statusAtem").classList.remove("alert-Connect");
+                document.getElementById("statusAtem").classList.remove("alert-Attempting");
+                  break;
+                case 2:
+                document.getElementById("statusAtem").classList.add('alert-Attempting');
+                document.getElementById("statusAtem").classList.remove("alert-Connect");
+                document.getElementById("statusAtem").classList.remove("alert-noConnect");
+                break;
+                case 4:
+                document.getElementById("statusAtem").classList.add('alert-Connect');
+                document.getElementById("statusAtem").classList.remove("alert-noConnect");
+                document.getElementById("statusAtem").classList.remove("alert-Attempting");
+                  break;
+                default:
+                document.getElementById("statusAtem").className = '';
+              }
+
+                document.getElementById("statusAtem").innerHTML = Atem.message;
+                document.getElementById("ipAtem").innerHTML = Atem.ip;
+          });
+      </script>
+</body>
+</html>

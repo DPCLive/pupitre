@@ -1,0 +1,79 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(24, 24, 24, 0.925);
+}
+.container {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-areas: "a-3Qoq9-3-0-0 a-K1WND-0 a-K1WND-0"
+    "a-3Qoq9-3-0-0 a-K1WND-1 a-K1WND-1"
+    "a-3Qoq9-3-0-0 a-K1WND-2-0 a-K1WND-2-1"
+    "a-3Qoq9-3-0-0 a-K1WND-2-0 a-K1WND-2-1"
+    "a-3Qoq9-3-0-0 a-K1WND-2-0 a-K1WND-2-1"
+    "a-3Qoq9-3-0-0 a-K1WND-2-0 a-K1WND-2-1"
+    "a-K1WND-6 a-K1WND-6 a-K1WND-6";
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: auto auto 1fr 1fr 1fr 1fr 60px;
+  }
+  .container > div {
+    border: 1px dashed #888;
+  }
+  
+
+  .logo{
+    max-width: 100%;
+    height: auto;
+  }
+  .a-K1WND-0 {
+    grid-area: a-K1WND-0;
+  }
+  .a-K1WND-1 {
+    grid-area: a-K1WND-1;
+  }
+
+  .a-3Qoq9-3-0-0 {
+    grid-area: a-3Qoq9-3-0-0;
+    background-color: #333;
+    width: 99%;
+  }
+  .a-K1WND-2-0 {
+    grid-area: a-K1WND-2-0;
+  }
+  .a-K1WND-2-1 {
+    grid-area: a-K1WND-2-1;
+  }
+  .a-K1WND-6 {
+    grid-area: a-K1WND-6;
+  }
+
+  .statusMachin{
+      width: 100%;
+      height: auto;
+  }
+  .statusMachin .vignette{
+    width: calc(25% - 10px);
+    float: left;
+    background-color: #333333;
+    height: 100%;
+    margin: 5px;
+    color: white;
+  }
+
+  .statusMachin .vignette .titre {
+      text-align: center;
+      margin: 5px;
+  }
+
+ .alert-Connect{
+    color: #4CAF50;
+}
+.alert-Attempting{
+    color: orange;
+}
+.alert-noConnect{
+      color: red;
+  }
