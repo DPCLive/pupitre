@@ -47,12 +47,6 @@ app.use('/static', express.static('node_modules'));
 // Handle connection
 io.on('connection', function (socket) {
     console.log("Client connecter");
-    // Send news on the socket
-    //socket.emit('news', news);
-
-    /*socket.on('my other event', function (data) {
-        console.log(data);
-    });*/
 });
 
 ////////////////////////////////////////
