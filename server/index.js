@@ -2,15 +2,47 @@ var Atem = require('dpclive-atem') // Load the atem module
 var Config = require("./config");
 var http = require('http');
 var express = require('express');
+var mongoose = require('mongoose');
+
 var app = express();
 const atem = new Atem();
 var dgram = require('dgram');
 var s = dgram.createSocket('udp4');
-var programM2 = [8,8];
+
+
+var len = 16;
+
+var Prv1Me = new Array(len).fill(0);
+var Prg1Me = [8];
+var Prv2Me = [8];
+var Prg2Me = []; // TMP1 - Arduino 2 - IP 178
+var key2Me = []; // TMP1 - Arduino 2 - IP 178
+var Prv3Me = [8];
+var Prg3Me = [8];
+var Prv4Me = [8];
+var Prg4Me = [8];
+
+var tmp1 = new Array(len).fill(0); 
+var tmp2 = new Array(len).fill(0); 
+var tmp3 = new Array(len).fill(0); 
+var touchePrecedent = new Array(3).fill(0); 
+
+const dbpath = "mongodb://localhost:27017/apps";
+const mongo = mongoose.connect(dbpath,  {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    });
+mongo.then(() => { 
+console.log('connected');
+}).catch((err) => {
+console.log('err', err);
+});
+
 
 ////////////////////////////////
 // Début - Appel des classes
 ////////////////////////////////
+var Mappings = require('./models/Mappings');
 
 var AtemClass = require('./class/Atem');
 var ToolsClass = require('./class/Tools');
@@ -22,7 +54,7 @@ var ToolsClass = require('./class/Tools');
 /////////////////////////
 // Variable global
 ///////////////////
-var precedent = [];
+//var precedent = [];
 
 // EJS
 app.set('views', './views')
@@ -37,16 +69,20 @@ var io = require('socket.io').listen(server);
 
 
 // Register the index route of your app that returns the HTML file
-app.get('/', (req, res) => {
-    res.render('index')
-   })
-
+   app.use('/',require('./routes/dashboard'));
+   
 // Expose the node_modules folder as static resources (to access socket.io.js in the browser)
 app.use('/static', express.static('node_modules'));
 
 // Handle connection
 io.on('connection', function (socket) {
     console.log("Client connecter");
+    // Send news on the socket
+    //socket.emit('news', news);
+
+    /*socket.on('my other event', function (data) {
+        console.log(data);
+    });*/
 });
 
 ////////////////////////////////////////
@@ -69,23 +105,43 @@ atem.on('connectionStateChange', function(state) {
 		
 	}else if(state.id=4){
         clearTimeout(timerConnect);
-	}else{
 	}
 	 
 }); 
 
 atem.on('programBus', function(mE, source, Transition) {
-	const arr = new Uint8Array(2 * 8 + 1);
+	//const arr = new Uint8Array(2 * 8 + 1);
 	console.log('program bus changed to', mE, 'source : ', source, 'Transition : ',Transition);
-    
-    var configs = Config.getConfigSonyOneColor(mE, source);
-    var ip = '192.168.1.178';//.concat('.', configs[0]);
+ 
+    //var configs = Config.getConfigSonyOneColor(mE, source);
+    //var ip = '192.168.1.178';//.concat('.', configs[0]);
+    var params = { me: mE, input: source }
+    Mappings.findOne(params).then(mapping =>{
+        if(mapping){
+            if(mapping.tmp == 3){
+                tmp3.fill(0,0,7);
+                tmp3[(mapping.groupe*2)]=mapping.address;
+                tmp3[(mapping.groupe*2)+1]=mapping.color;
+                //console.log(mapping.ipArduino);
+                console.table(tmp3);
+                const buf1 = Buffer.from(tmp3, "hex");
+                s.send(buf1, 8888, mapping.ipArduino); 
+                //console.table(buf1);
+            }            	
+        }
+    });
 
-        arr[0] = 1;
+  
+
+
+
+
+
+        /*arr[0] = 1;
        console.log("1 :" +configs[1]);
         arr[configs[1]] = dec2hexString(configs[2]); // valeur
 		arr[2] = "0xFF"; 
-		console.log(arr[1]);
+		console.log(arr[1]);*/
 		/*if(source ==0){
             	// Ligne 1
 		arr[1] = 0x01; // valeur
@@ -136,8 +192,8 @@ atem.on('programBus', function(mE, source, Transition) {
 		arr[15] = 0x0;
 		arr[16] = 0xFF;*/
 		
-		const buf1 = Buffer.from(arr, "hex");
-		s.send(buf1, 8888, ip);	
+		//const buf1 = Buffer.from(arr, "hex");
+		//s.send(buf1, 8888, ip);	
 });
 ////////////////////////////////////////
 ///
@@ -147,7 +203,40 @@ atem.on('programBus', function(mE, source, Transition) {
 ///
 ////////////////////////////////////////
 s.on('message', function(msg, rinfo) {
-    moment = new ToolsClass();
+
+    // Selection du TMP
+    var selectTmp = parseInt(msg.slice(0, 1).toString());
+    // Sélection de la bar
+    var selectGroupe  = parseInt(msg.slice(1, 2).toString());
+    // sélection de l'adresse
+    var selectTouche = parseInt(msg.slice(2, 3).toString());
+   
+    if(selectTmp !== parseInt(touchePrecedent[0]) || selectGroupe !== parseInt(touchePrecedent[1]) || selectTouche !== parseInt(touchePrecedent[2])){
+        console.log("tmp : " + selectTmp + " " + selectGroupe  + " " + selectTouche);
+        var params = { tmp: selectTmp, groupe: selectGroupe, touche: selectTouche };
+        Mappings.findOne(params).then(mapping =>{
+           
+            if(mapping){
+                switch (mapping.barAtem) {
+                    case 1:
+                        atem.setProgram(mapping.input,mapping.me);
+                        break;
+                
+                    default:
+                        break;
+                }
+                //console.log("me : " +mapping.me +  "inputs : " + mapping.input)
+            }
+        });
+
+        touchePrecedent[0] = parseInt(selectTmp);
+        touchePrecedent[1] = parseInt(selectGroupe);
+        touchePrecedent[2] = parseInt(selectTouche);
+        //console.table(touchePrecedent);
+
+    }
+    
+    /*moment = new ToolsClass();
     var command = [];
     // récupération des informations de communication (ip, port)
     command[0] = rinfo;
@@ -181,7 +270,7 @@ s.on('message', function(msg, rinfo) {
             default:
                 break;
         }
-    }
+    }*/
 
      
   });
@@ -193,10 +282,6 @@ Config.chargerConfigAtem();
 Config.chargerConfigSony();
 atem.ip = Config.getConfigAtem().ip;
 atem.connect();
-
-function dec2hexString(dec) {
-    return '0x' + (dec+0x10000).toString(16).substr(-4).toUpperCase();
- }
 
 // The server should start listening
 server.listen(8000);
